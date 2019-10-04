@@ -1,5 +1,6 @@
 from room import Room
 import player
+import item
 
 # Declare all the rooms
 
@@ -37,7 +38,10 @@ room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 
 room['treasure'].s_to = room['narrow']
+# Creating and adding items to rooms 
+item_1 = item.Item('Love', 'It lifts your spirits')
 
+room['treasure'].add_item(item_1)
 #
 # Main
 #
@@ -64,16 +68,26 @@ print('ENTER "q" TO QUIT')
 while on == 1:
     paths = room[player_1.location].available_path()
     
-    print('Current location: ', player_1.location)
+    print('\nCurrent location: ', room[player_1.location].room, '\nDescription: ', room[player_1.location].desc)
+    print('Items in this room: ', room[player_1.location].items)
     print(f'Possible directions: {paths} \n')
     k = input('Press key: ')
 
     if k == 'q':
         break
+    if k == 'i':
+        print('Inventory: ', player_1.items)
+    # check GET and DROP commands for item 
+
     if k in paths:
         if k == 'n':
-            newloc = room[player_1.location].n_to.room.split(' ',1)[0].lower()
-            player_1.update_location(newloc)
+            room_name = room[player_1.location].n_to.room.split(' ',1)
+            if room_name[0].lower() in room.keys():
+                newloc = room_name[0].lower()
+                player_1.update_location(newloc)
+            else:
+                newloc = room_name[1].lower()
+                player_1.update_location(newloc)
 
         elif k == 'e':
             newloc = room[player_1.location].e_to.room.split(' ',1)[0].lower()
@@ -86,6 +100,26 @@ while on == 1:
         elif k == 'w':
             newloc = room[player_1.location].w_to.room.split(' ',1)[0].lower()
             player_1.update_location(newloc)
+
+    elif len(k) > 1:
+        k_split = k.split(' ', 1)
+        action = k_split[0]
+        item_name = k_split[1]
+
+        if action == 'get' or action == 'take':
+            for i in room[player_1.location].items:
+                if i.name == item_name:
+                    player_1.add_item(i)
+                    i.on_take()
+                    room[player_1.location].take_item(i)
+
+        if action == 'drop':
+            for i in player_1.items:
+                if i.name == item_name:
+                    player_1.drop_item(i)
+                    i.on_drop()
+                    room[player_1.location].add_item(i)
+        
     else:
         print('\n###You can not go that way###\n')
         

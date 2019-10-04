@@ -8,6 +8,13 @@ class Room:
         self.w_to = None
         self.e_to = None
         self.s_to = None
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def take_item(self, item):
+        self.items.remove(item)
 
     def available_path(self):
         path_list = []
